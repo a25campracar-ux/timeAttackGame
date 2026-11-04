@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import KeyPad from '../components/KeyPad.vue'
 import ResultsTable from '../components/ResultsTable.vue'
 
@@ -55,6 +55,23 @@ function rebreTecla(tecla) {
     jugant.value = false;
   }
 }
+
+// Teclado físico: convierte la tecla pulsada en una de las del juego
+function gestionarTeclat(e) {
+  // Ignora las repeticiones automáticas al mantener una tecla pulsada
+  if (e.repeat) return
+  // Ignora combinaciones como Ctrl+S para no romper los atajos del navegador
+  if (e.ctrlKey || e.metaKey || e.altKey) return
+
+  const tecla = e.key.toUpperCase()
+  if (tecles.includes(tecla)) {
+    rebreTecla(tecla)
+  }
+}
+
+// Escucha el teclado mientras la vista está en pantalla
+onMounted(() => window.addEventListener('keydown', gestionarTeclat))
+onUnmounted(() => window.removeEventListener('keydown', gestionarTeclat))
 </script>
 
 <template>
