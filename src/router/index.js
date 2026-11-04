@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import gameBoardView from '../view/GameBoardView.vue'
+import GameBoardView from '../views/GameBoardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'GameBoard',
-      component: GameBoard,
+      component: GameBoardView,
     },
   ],
 })
