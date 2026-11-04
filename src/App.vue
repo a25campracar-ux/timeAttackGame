@@ -1,7 +1,15 @@
 <script setup></script>
 
 <template>
-<RouterView></RouterView>
+  <main class="container">
+    <RouterView />
+  </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+main {
+  max-width: 640px;
+  padding-block: 2rem;
+  text-align: center;
+}
+</style>

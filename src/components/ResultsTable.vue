@@ -25,3 +25,19 @@ defineProps({
     </tbody>
   </table>
 </template>
+<style scoped>
+table {
+  margin-top: 2rem;
+}
+
+th,
+td {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Destaca la columna del error */
+td:last-child {
+  font-weight: bold;
+}
+</style>
