@@ -76,6 +76,11 @@ function rebreTecla(tecla) {
   }
 }
 
+// Cancela la partida (o la cuenta atrás) recargando la página
+function cancelarPartida() {
+  location.reload()
+}
+
 // Teclado físico: convierte la tecla pulsada en una de las del juego
 function gestionarTeclat(e) {
   // Ignora las repeticiones automáticas al mantener una tecla pulsada
@@ -123,6 +128,14 @@ onUnmounted(() => {
     :premudes="premudes"
     @premuda="rebreTecla" 
   />
+  <!-- Solo se ve mientras hay una partida o cuenta atrás en marcha -->
+  <button
+    v-if="jugant || compteEnrere"
+    class="secondary outline boto-cancel"
+    @click="cancelarPartida"
+  >
+    Cancel·lar partida
+  </button>
   <ResultsTable
     v-if="!jugant && resultats.length === tecles.length" 
     :resultats="resultats"
@@ -153,6 +166,11 @@ onUnmounted(() => {
 .boto-inici:active {
   transform: translateY(4px);
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* Botón de cancelar, discreto debajo de las teclas */
+.boto-cancel {
+  margin-top: 1.5rem;
 }
 
 /* Número grande de la cuenta atrás, aparece "saltando" */
