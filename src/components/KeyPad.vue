@@ -3,10 +3,13 @@
 // Props que recibe del padre:
 // - tecles: array con las teclas disponibles
 // - bloquejat: si es true, los botones están deshabilitados
+// - premudes: teclas ya pulsadas (se ven apagadas)
+// - colors: color de cada tecla, p. ej. { A: 'var(--pico-color-pumpkin-450)' }
 defineProps({
   tecles: Array,
   bloquejat: Boolean,
   premudes: Array,
+  colors: Object,
 })
 
 // Avisa al padre de qué tecla se ha pulsado
@@ -14,12 +17,14 @@ const emit = defineEmits(['premuda'])
 </script>
 
 <template>
+  <!-- Las cuatro teclas en fila, separadas -->
   <div class="teclat">
+    <!-- Cambiamos las variables de color de Pico para pintar cada tecla.
+         Las ya pulsadas quedan deshabilitadas, y Pico las muestra apagadas -->
     <button
       v-for="tecla in tecles"
       :key="tecla"
-      class="tecla"
-      :class="{ premuda: premudes.includes(tecla) }"
+      :style="{ '--pico-background-color': colors[tecla], '--pico-border-color': colors[tecla] }"
       :disabled="bloquejat || premudes.includes(tecla)"
       @click="emit('premuda', tecla)"
     >
@@ -28,39 +33,19 @@ const emit = defineEmits(['premuda'])
   </div>
 </template>
 
+<!-- Pico no tiene botones cuadrados: solo lo mínimo, usando sus variables -->
 <style scoped>
-/* Las cuatro teclas en fila, del mismo tamaño */
 .teclat {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-block: 2rem;
+  /* minmax(0, 1fr): las columnas pueden encoger en pantallas estrechas */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--pico-spacing);
+  margin-bottom: var(--pico-spacing);
 }
 
-/* Teclas grandes y cuadradas, como las de un teclado */
-.tecla {
+.teclat button {
   aspect-ratio: 1;
-  font-family: monospace;
-  font-size: 2.5rem;
-  font-weight: bold;
-  border-radius: 1rem;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
-  transition: transform 0.08s, box-shadow 0.08s;
-}
-
-/* Efecto de "hundirse" al hacer clic */
-.tecla:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
-}
-
-/* Tecla ya usada: verde y hundida */
-.tecla.premuda {
-  background-color: #2e9e5b;
-  border-color: #2e9e5b;
-  color: white;
-  opacity: 1;
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  padding: 0;
+  font-size: 2rem;
 }
 </style>

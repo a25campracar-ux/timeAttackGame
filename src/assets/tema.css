@@ -1,0 +1,16 @@
+/* Ajustes del tema de Pico. Se importa después de Pico para poder sobrescribir sus variables */
+:root {
+  /* Esquinas más redondeadas en todo: tarjetas, botones, inputs… */
+  --pico-border-radius: 1rem;
+}
+
+/* Pico no tiene clases para centrar: centramos todo el contenido */
+main {
+  text-align: center;
+}
+
+/* Pico alinea las celdas a la izquierda aunque el padre esté centrado */
+th,
+td {
+  text-align: center;
+}

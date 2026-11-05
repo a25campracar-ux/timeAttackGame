@@ -1,8 +1,10 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import KeyPad from '../components/KeyPad.vue'
 import ResultsTable from '../components/ResultsTable.vue'
+import { useGameStore } from '@/stores/game'
 
+const store = useGameStore()
 const tecles = ['A', 'S', 'D', 'F']
 
 // Segundos en los que hay que pulsar cada tecla 
@@ -13,16 +15,32 @@ const tempsObjectiu = {
   F: 7
 }
 
+// Color de cada tecla (paleta de Pico): se usa en los objetivos y en los botones
+const colorsTecles = {
+  A: 'var(--pico-color-pumpkin-450)',
+  S: 'var(--pico-color-azure-500)',
+  D: 'var(--pico-color-jade-500)',
+  F: 'var(--pico-color-violet-500)'
+}
+
 // Datos reactivos
 const jugant = ref(false);
 const resultats = ref([]);
 const premudes = ref([]);
+const nom = ref ('');
 
 let tempsInici = 0
 
 // Cuenta atrás antes de empezar (0 = no hay cuenta atrás en marcha)
 const compteEnrere = ref(0)
 let interval = null
+
+// Texto del botón principal según el momento de la partida
+const textBoto = computed(() => {
+  if (compteEnrere.value) return compteEnrere.value
+  if (jugant.value) return 'Ja! Compta mentalment…'
+  return resultats.value.length ? 'Tornar a jugar' : 'Començar'
+})
 
 function començarCompteEnrere() {
   // Limpia la partida anterior para que no se vean las teclas verdes ni la tabla
@@ -76,11 +94,6 @@ function rebreTecla(tecla) {
   }
 }
 
-// Cancela la partida (o la cuenta atrás) recargando la página
-function cancelarPartida() {
-  location.reload()
-}
-
 // Teclado físico: convierte la tecla pulsada en una de las del juego
 function gestionarTeclat(e) {
   // Ignora las repeticiones automáticas al mantener una tecla pulsada
@@ -94,6 +107,11 @@ function gestionarTeclat(e) {
   }
 }
 
+function entrar() {
+  if (nom.value.trim() === '') return
+  store.guardarNom(nom.value.trim())
+}
+
 // Escucha el teclado mientras la vista está en pantalla
 onMounted(() => window.addEventListener('keydown', gestionarTeclat))
 onUnmounted(() => {
@@ -104,98 +122,68 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <hgroup>
-    <h1>Time Attack</h1>
-    <p>Prem cada tecla quan creguis que ha passat el seu temps. Sense rellotge!</p>
-  </hgroup>
+  <!-- Pantalla de bienvenida: pide el nombre antes de jugar -->
+  <article v-if="!store.nomJugador">
+    <hgroup>
+      <h2>Benvingut a Time Attack!</h2>
+      <p>Introdueix el teu nom per començar a jugar.</p>
+    </hgroup>
 
-  <!-- Zona de altura fija: así las teclas no saltan al cambiar de estado -->
-  <div class="zona">
-    <!-- :key hace que la animación se repita con cada número -->
-    <span v-if="compteEnrere" :key="compteEnrere" class="numero">
-      {{ compteEnrere }}
-    </span>
+    <!-- Al ser un formulario, también se entra pulsando Intro -->
+    <form @submit.prevent="entrar">
+      <fieldset role="group">
+        <input
+          v-model="nom"
+          placeholder="El teu nom"
+          autocomplete="off"
+          aria-label="Nom del jugador"
+        />
+        <button type="submit">Entrar</button>
+      </fieldset>
+    </form>
+  </article>
 
-    <p v-else-if="jugant" class="estat">Ja! Compta mentalment…</p>
+  <!-- Todo el juego: solo aparece cuando ya hay nombre guardado -->
+  <div v-else>
+    <article>
+      <hgroup>
+        <h2>Hola, {{ store.nomJugador }}!</h2>
+        <p><small>Prem cada tecla al seu temps, sense rellotge. També amb el teclat.</small></p>
+      </hgroup>
 
-    <button v-else class="boto-inici" @click="començarCompteEnrere">
-      {{ resultats.length ? 'Tornar a jugar' : 'Començar' }}
-    </button>
+      <!-- Objetivo de cada tecla, cada letra con su color -->
+      <p>
+        <template v-for="(tecla, i) in tecles" :key="tecla">
+          <strong :style="{ color: colorsTecles[tecla] }">{{ tecla }}</strong>: {{ tempsObjectiu[tecla] }}s
+          <!-- &emsp; = espacio ancho entre objetivos (no después del último) -->
+          <template v-if="i < tecles.length - 1">&emsp;&emsp;</template>
+        </template>
+      </p>
+
+      <KeyPad
+        :tecles="tecles"
+        :bloquejat="!jugant"
+        :premudes="premudes"
+        :colors="colorsTecles"
+        @premuda="rebreTecla"
+      />
+
+      <!-- Un solo botón que cambia de texto: Començar → 3, 2, 1 → Ja! → Tornar a jugar.
+           role="group" hace que ocupe todo el ancho, con el texto centrado -->
+      <div role="group">
+        <button
+          :disabled="jugant || compteEnrere > 0"
+          @click="començarCompteEnrere"
+        >
+          {{ textBoto }}
+        </button>
+      </div>
+    </article>
+
+    <!-- Resultados de la última partida -->
+    <article v-if="!jugant && resultats.length === tecles.length">
+      <h3>Resultats</h3>
+      <ResultsTable :resultats="resultats" />
+    </article>
   </div>
-  <KeyPad 
-    :tecles="tecles" 
-    :bloquejat="!jugant" 
-    :premudes="premudes"
-    @premuda="rebreTecla" 
-  />
-  <!-- Solo se ve mientras hay una partida o cuenta atrás en marcha -->
-  <button
-    v-if="jugant || compteEnrere"
-    class="secondary outline boto-cancel"
-    @click="cancelarPartida"
-  >
-    Cancel·lar partida
-  </button>
-  <ResultsTable
-    v-if="!jugant && resultats.length === tecles.length" 
-    :resultats="resultats"
-  />
 </template>
-
-<style scoped>
-.zona {
-  height: 7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Botón con el mismo estilo que las teclas */
-.boto-inici {
-  width: 100%;
-  padding-block: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-radius: 1rem;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
-  transition: transform 0.08s, box-shadow 0.08s;
-}
-
-.boto-inici:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
-}
-
-/* Botón de cancelar, discreto debajo de las teclas */
-.boto-cancel {
-  margin-top: 1.5rem;
-}
-
-/* Número grande de la cuenta atrás, aparece "saltando" */
-.numero {
-  font-size: 5rem;
-  font-weight: bold;
-  color: var(--pico-primary);
-  animation: aparicio 0.4s ease-out;
-}
-
-@keyframes aparicio {
-  from { transform: scale(1.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* Mientras se juega, el texto parpadea suavemente */
-.estat {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: var(--pico-primary);
-  animation: parpelleig 1.2s ease-in-out infinite;
-}
-
-@keyframes parpelleig {
-  50% { opacity: 0.4; }
-}
-</style>
