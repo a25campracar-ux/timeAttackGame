@@ -4,6 +4,7 @@ import KeyPad from '../components/KeyPad.vue'
 import ResultsTable from '../components/ResultsTable.vue'
 import ScoreBoard from '../components/ScoreBoard.vue'
 import { useGameStore } from '@/stores/game'
+import { socket } from '@/services/socket'
 
 const store = useGameStore()
 const tecles = ['A', 'S', 'D', 'F']
@@ -99,7 +100,16 @@ function rebreTecla(tecla) {
       const element = resultats.value[index]
       errorTotal = errorTotal + Math.abs(element.error);
     }
-    store.guardarPartida(Number(errorTotal.toFixed(2)))
+    const errorFinal = Number(errorTotal.toFixed(2))
+
+    // Guardem la partida al nostre Pinia (historial local)
+    store.guardarPartida(errorFinal)
+
+    // Enviem el resultat al servidor perquè el reparteixi a tothom
+    socket.emit('resultat', {
+      nom: store.nomJugador,
+      errorTotal: errorFinal
+    })
   }
 }
 
@@ -121,10 +131,34 @@ function entrar() {
   store.guardarNom(nom.value.trim())
 }
 
-// Escucha el teclado mientras la vista está en pantalla
-onMounted(() => window.addEventListener('keydown', gestionarTeclat))
+// Socket.IO: s'executa quan la connexió amb el servidor funciona
+function connectat() {
+  console.log('Connectat al servidor!', socket.id)
+}
+
+// Socket.IO: el servidor ens envia la classificació global (en connectar i després de cada partida)
+function rebreClassificacio(dades) {
+  console.log('Classificació rebuda:', dades)
+  store.actualitzarClassificacio(dades)
+}
+
+// En entrar a la vista: escolta el teclat i connecta amb el servidor
+onMounted(() => {
+  window.addEventListener('keydown', gestionarTeclat)
+
+  socket.on('connect', connectat)
+  socket.on('classificacio', rebreClassificacio)
+  socket.connect()
+})
+
+// En sortir de la vista: ho deixa tot net
 onUnmounted(() => {
   window.removeEventListener('keydown', gestionarTeclat)
+
+  socket.off('connect', connectat)
+  socket.off('classificacio', rebreClassificacio)
+  socket.disconnect()
+
   // Si se sale de la vista a media cuenta atrás, la paramos
   clearInterval(interval)
 })
