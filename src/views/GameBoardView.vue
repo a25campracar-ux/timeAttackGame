@@ -97,7 +97,6 @@ function rebreTecla(tecla) {
     let errorTotal = 0
     for (let index = 0; index < resultats.value.length; index++) {
       const element = resultats.value[index]
-      // ✏️ HUECO 3: suma l'error d'aquesta tecla (en valor absolut)
       errorTotal = errorTotal + Math.abs(element.error);
     }
     store.guardarPartida(Number(errorTotal.toFixed(2)))

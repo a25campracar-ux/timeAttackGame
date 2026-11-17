@@ -8,7 +8,6 @@ const store = useGameStore()
 // Repte opcional: millor marca (menys error = millor)
 const millorMarca = computed(() => {
   if (store.partides.length === 0) return null
-  // ✏️ HUECO 4: de cada partida, quin número vols comparar?
   return Math.min(...store.partides.map(p => p.errorTotal))
 })
 </script>
