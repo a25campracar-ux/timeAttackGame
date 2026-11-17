@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import KeyPad from '../components/KeyPad.vue'
 import ResultsTable from '../components/ResultsTable.vue'
+import ScoreBoard from '../components/ScoreBoard.vue'
 import { useGameStore } from '@/stores/game'
 
 const store = useGameStore()
@@ -91,6 +92,15 @@ function rebreTecla(tecla) {
 
   if (resultats.value.length === tecles.length) {
     jugant.value = false;
+
+    // Pas 3: suma els errors de totes les tecles i guarda la partida a Pinia
+    let errorTotal = 0
+    for (let index = 0; index < resultats.value.length; index++) {
+      const element = resultats.value[index]
+      // ✏️ HUECO 3: suma l'error d'aquesta tecla (en valor absolut)
+      errorTotal = errorTotal + Math.abs(element.error);
+    }
+    store.guardarPartida(Number(errorTotal.toFixed(2)))
   }
 }
 
@@ -150,6 +160,9 @@ onUnmounted(() => {
         <h2>Hola, {{ store.nomJugador }}!</h2>
         <p><small>Prem cada tecla al seu temps, sense rellotge. També amb el teclat.</small></p>
       </hgroup>
+
+      <!-- Pas 4: historial, sense props (llegeix Pinia directament) -->
+      <ScoreBoard />
 
       <!-- Objetivo de cada tecla, cada letra con su color -->
       <p>
