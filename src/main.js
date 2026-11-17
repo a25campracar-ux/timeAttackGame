@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import { createPinia } from 'pinia' 
 import '@picocss/pico'
+import '@fontsource-variable/host-grotesk'
 // Paleta de colores de Pico (variables --pico-color-*) para colorear las teclas
 import '@picocss/pico/css/pico.colors.min.css'
 // Nuestros ajustes del tema, siempre después de Pico

@@ -1,13 +1,20 @@
-<script setup></script>
+<script setup>
+import { useGameStore } from '@/stores/game'
+
+const store = useGameStore()
+</script>
 
 <template>
-  <!-- Barra superior con el nombre del juego -->
-  <header class="container">
-    <nav>
-      <ul>
-        <li><strong>Time Attack!</strong></li>
-      </ul>
-    </nav>
+  <!-- Fila de marca: nom del joc i, si n'hi ha, el jugador -->
+  <header class="container capcalera">
+    <a class="marca" href="./" aria-label="Time Attack, inici">
+      <span class="marca__signe" aria-hidden="true"></span>
+      Time Attack
+    </a>
+    <p class="capcalera__info">
+      <template v-if="store.nomJugador">Jugant com <strong>{{ store.nomJugador }}</strong></template>
+      <template v-else>Classificació en temps real</template>
+    </p>
   </header>
 
   <main class="container">

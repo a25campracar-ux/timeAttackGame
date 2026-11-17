@@ -33,19 +33,24 @@ const emit = defineEmits(['premuda'])
   </div>
 </template>
 
-<!-- Pico no tiene botones cuadrados: solo lo mínimo, usando sus variables -->
 <style scoped>
 .teclat {
   display: grid;
-  /* minmax(0, 1fr): las columnas pueden encoger en pantallas estrechas */
+  /* minmax(0, 1fr): les columnes poden encongir en pantalles estretes */
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--pico-spacing);
-  margin-bottom: var(--pico-spacing);
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
+/* Tecles quadrades amb el color de cada tecla (el color és del producte) */
 .teclat button {
   aspect-ratio: 1;
+  margin: 0;
   padding: 0;
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 1rem + 3vw, 3rem);
+  font-weight: 500;
+  color: #0a0a0c;
+  box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.18);
 }
+.teclat button:disabled { opacity: 0.4; }
 </style>

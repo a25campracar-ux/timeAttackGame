@@ -5,24 +5,23 @@ defineProps({
 </script>
 
 <template>
-  <!-- overflow-auto: en pantallas estrechas la tabla hace scroll en vez de romperse -->
+  <!-- overflow-auto: en pantalles estretes la taula fa scroll en lloc de trencar-se -->
   <div class="overflow-auto">
-    <table class="striped">
+    <table>
       <thead>
         <tr>
           <th>Tecla</th>
-          <th>Objectiu</th>
-          <th>Temps real</th>
-          <th>Error</th>
+          <th class="num">Objectiu</th>
+          <th class="num">Temps real</th>
+          <th class="num">Error</th>
         </tr>
       </thead>
-
       <tbody>
         <tr v-for="r in resultats" :key="r.tecla">
-          <td>{{ r.tecla }}</td>
-          <td>{{ r.objectiu }} s</td>
-          <td>{{ r.tempsReal }} s</td>
-          <td>{{ r.error }} s</td>
+          <td><strong>{{ r.tecla }}</strong></td>
+          <td class="num">{{ r.objectiu }} s</td>
+          <td class="num">{{ r.tempsReal }} s</td>
+          <td class="num">{{ r.error }} s</td>
         </tr>
       </tbody>
     </table>
